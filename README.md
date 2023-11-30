@@ -27,7 +27,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/confus1on/valkyrietry"
+	"github.com/ruang-guru/valkyrietry"
 )
 
 func main() {
