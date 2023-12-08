@@ -62,7 +62,9 @@ func Do(f RetryFunc, options ...Option) error {
 	currentAttempt := 0
 	currentInterval := valkyrietry.Configuration.InitialRetryDelay
 
-	timer := NewTimer()
+	// Initialize the timer to a zero value for
+	// the first initialization.
+	timer := time.NewTimer(0)
 
 	defer func() {
 		timer.Stop()
@@ -85,12 +87,14 @@ func Do(f RetryFunc, options ...Option) error {
 			return ErrMaxRetryAttemptsExceeded
 		}
 
-		timer.Start(retryInterval)
+		// Reset the duration to match the retry interval duration.
+		// Thus, we will adjust the timer interval for each retry.
+		timer.Reset(retryInterval)
 
 		select {
 		case <-valkyrietry.ctx.Done():
 			return valkyrietry.ctx.Err()
-		case <-timer.C():
+		case <-timer.C:
 		}
 	}
 }
@@ -106,7 +110,9 @@ func DoWithContext(ctx context.Context, f RetryFunc, options ...Option) error {
 	currentAttempt := 0
 	currentInterval := valkyrietry.Configuration.InitialRetryDelay
 
-	timer := NewTimer()
+	// Initialize the timer to a zero value for
+	// the first initialization.
+	timer := time.NewTimer(0)
 
 	defer func() {
 		timer.Stop()
@@ -128,12 +134,14 @@ func DoWithContext(ctx context.Context, f RetryFunc, options ...Option) error {
 
 		currentAttempt++
 
-		timer.Start(retryInterval)
+		// Reset the duration to match the retry interval duration.
+		// Thus, we will adjust the timer interval for each retry.
+		timer.Reset(retryInterval)
 
 		select {
 		case <-valkyrietry.ctx.Done():
 			return valkyrietry.ctx.Err()
-		case <-timer.C():
+		case <-timer.C:
 		}
 	}
 }
@@ -149,7 +157,9 @@ func DoWithData[T any](f RetryFuncWithData[T], options ...Option) (T, error) {
 	currentAttempt := 0
 	currentInterval := valkyrietry.Configuration.InitialRetryDelay
 
-	timer := NewTimer()
+	// Initialize the timer to a zero value for
+	// the first initialization.
+	timer := time.NewTimer(0)
 
 	defer func() {
 		timer.Stop()
@@ -173,12 +183,14 @@ func DoWithData[T any](f RetryFuncWithData[T], options ...Option) (T, error) {
 
 		currentAttempt++
 
-		timer.Start(retryInterval)
+		// Reset the duration to match the retry interval duration.
+		// Thus, we will adjust the timer interval for each retry.
+		timer.Reset(retryInterval)
 
 		select {
 		case <-valkyrietry.ctx.Done():
 			return response, valkyrietry.ctx.Err()
-		case <-timer.C():
+		case <-timer.C:
 		}
 	}
 }
@@ -194,7 +206,9 @@ func DoWithDataAndContext[T any](ctx context.Context, f RetryFuncWithData[T], op
 	currentAttempt := 0
 	currentInterval := valkyrietry.Configuration.InitialRetryDelay
 
-	timer := NewTimer()
+	// Initialize the timer to a zero value for
+	// the first initialization.
+	timer := time.NewTimer(0)
 
 	defer func() {
 		timer.Stop()
@@ -218,12 +232,14 @@ func DoWithDataAndContext[T any](ctx context.Context, f RetryFuncWithData[T], op
 
 		currentAttempt++
 
-		timer.Start(retryInterval)
+		// Reset the duration to match the retry interval duration.
+		// Thus, we will adjust the timer interval for each retry.
+		timer.Reset(retryInterval)
 
 		select {
 		case <-valkyrietry.ctx.Done():
 			return response, valkyrietry.ctx.Err()
-		case <-timer.C():
+		case <-timer.C:
 		}
 	}
 }
