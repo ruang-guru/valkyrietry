@@ -8,6 +8,7 @@ import (
 )
 
 func TestBasicRetrySuccess(t *testing.T) {
+	ctx := context.Background()
 	failureCount := 0
 	maxFailures := 3
 	retryFunc := func() error {
@@ -18,7 +19,7 @@ func TestBasicRetrySuccess(t *testing.T) {
 		return nil
 	}
 
-	err := Do(retryFunc, WithMaxRetryAttempts(5))
+	err := Do(ctx, retryFunc, WithMaxRetryAttempts(5))
 
 	if err != nil {
 		t.Errorf("Expected function to succeed, but it failed: %v", err)
@@ -29,11 +30,13 @@ func TestBasicRetrySuccess(t *testing.T) {
 }
 
 func TestMaxRetryAttemptsExceeded(t *testing.T) {
+	ctx := context.Background()
 	retryFunc := func() error {
 		return errors.New("permanent error")
 	}
 
 	err := Do(
+		ctx,
 		retryFunc,
 		WithMaxRetryAttempts(2),
 	)
@@ -44,6 +47,7 @@ func TestMaxRetryAttemptsExceeded(t *testing.T) {
 }
 
 func TestRetryWithContextCancellation(t *testing.T) {
+	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
@@ -52,7 +56,7 @@ func TestRetryWithContextCancellation(t *testing.T) {
 		return errors.New("error after delay")
 	}
 
-	err := DoWithContext(
+	err := Do(
 		ctx,
 		retryFunc,
 	)
@@ -63,6 +67,7 @@ func TestRetryWithContextCancellation(t *testing.T) {
 }
 
 func TestJitterAndBackoff(t *testing.T) {
+	ctx := context.Background()
 	var retryDurations []time.Duration
 	var lastRetryTime time.Time
 
@@ -80,6 +85,7 @@ func TestJitterAndBackoff(t *testing.T) {
 	jitterPercentage := float32(0.5) // 50% jitter
 
 	_ = Do(
+		ctx,
 		retryFunc,
 		WithMaxRetryAttempts(maxAttempts),
 		WithRetryDelay(initialDelay),
@@ -103,6 +109,7 @@ func TestJitterAndBackoff(t *testing.T) {
 }
 
 func TestRetryIntervalProgression(t *testing.T) {
+	ctx := context.Background()
 	var retryDurations []time.Duration
 	var lastRetryTime time.Time
 
@@ -120,6 +127,7 @@ func TestRetryIntervalProgression(t *testing.T) {
 	jitterPercentage := float32(0.5) // 50% jitter
 
 	_ = Do(
+		ctx,
 		retryFunc,
 		WithMaxRetryAttempts(maxAttempts),
 		WithRetryDelay(initialDelay),

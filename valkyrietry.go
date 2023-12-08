@@ -52,59 +52,11 @@ func defaultValkyrietryWithContext(ctx context.Context, options ...Option) *Valk
 }
 
 // Do
-// Start the retry mechanism and continue until the process inside the `RetryFunc`
-// returns successfully (without error) or until the maximum number of retry attempts is exceeded.
-//
-// This function guarantees that the given `RetryFunc` will run at least once.
-func Do(f RetryFunc, options ...Option) error {
-	valkyrietry := defaultValkyrietry(options...)
-
-	currentAttempt := 0
-	currentInterval := valkyrietry.Configuration.InitialRetryDelay
-
-	// Initialize the timer to a zero value for
-	// the first initialization.
-	timer := time.NewTimer(0)
-
-	defer func() {
-		timer.Stop()
-	}()
-
-	for {
-		err := f()
-
-		if err == nil {
-			return nil
-		}
-
-		retryInterval := valkyrietry.getRetryIntervalValue(currentInterval)
-		currentInterval = time.Duration(float32(currentInterval) * valkyrietry.Configuration.RetryBackoffMultiplier)
-
-		currentAttempt++
-
-		if currentAttempt > int(valkyrietry.Configuration.MaxRetryAttempts) &&
-			valkyrietry.Configuration.MaxRetryAttempts != 0 {
-			return ErrMaxRetryAttemptsExceeded
-		}
-
-		// Reset the duration to match the retry interval duration.
-		// Thus, we will adjust the timer interval for each retry.
-		timer.Reset(retryInterval)
-
-		select {
-		case <-valkyrietry.ctx.Done():
-			return valkyrietry.ctx.Err()
-		case <-timer.C:
-		}
-	}
-}
-
-// DoWithContext
 // Start the retry mechanism using the given context and continue running the process until the `RetryFunc`
 // returns successfully (without error) or until the maximum number of retry attempts is exceeded.
 //
 // This function ensures that the given `RetryFunc` will run at least once.
-func DoWithContext(ctx context.Context, f RetryFunc, options ...Option) error {
+func Do(ctx context.Context, f RetryFunc, options ...Option) error {
 	valkyrietry := defaultValkyrietryWithContext(ctx, options...)
 
 	currentAttempt := 0
@@ -147,60 +99,11 @@ func DoWithContext(ctx context.Context, f RetryFunc, options ...Option) error {
 }
 
 // DoWithData
-// Start the retry mechanism with any given data to receive and run the process until the `RetryFunc`
-// successfully returns with the data (without error) or until the maximum number of retry attempts is exceeded.
-//
-// This function ensures that the given `RetryFunc` will run at least once.
-func DoWithData[T any](f RetryFuncWithData[T], options ...Option) (T, error) {
-	valkyrietry := defaultValkyrietry(options...)
-
-	currentAttempt := 0
-	currentInterval := valkyrietry.Configuration.InitialRetryDelay
-
-	// Initialize the timer to a zero value for
-	// the first initialization.
-	timer := time.NewTimer(0)
-
-	defer func() {
-		timer.Stop()
-	}()
-
-	var response T
-
-	for {
-		if currentAttempt > int(valkyrietry.Configuration.MaxRetryAttempts) {
-			return response, ErrMaxRetryAttemptsExceeded
-		}
-
-		response, err := f()
-
-		if err == nil {
-			return response, nil
-		}
-
-		retryInterval := valkyrietry.getRetryIntervalValue(currentInterval)
-		currentInterval = time.Duration(float32(currentInterval) * valkyrietry.Configuration.RetryBackoffMultiplier)
-
-		currentAttempt++
-
-		// Reset the duration to match the retry interval duration.
-		// Thus, we will adjust the timer interval for each retry.
-		timer.Reset(retryInterval)
-
-		select {
-		case <-valkyrietry.ctx.Done():
-			return response, valkyrietry.ctx.Err()
-		case <-timer.C:
-		}
-	}
-}
-
-// DoWithDataAndContext
 // Start the retry mechanism with any given data to receive and a context, and continue running the process until the `RetryFunc`
 // successfully returns with the data (without error) or until the maximum number of retry attempts is exceeded.
 //
 // This function ensures that the given `RetryFunc` will run at least once.
-func DoWithDataAndContext[T any](ctx context.Context, f RetryFuncWithData[T], options ...Option) (T, error) {
+func DoWithData[T any](ctx context.Context, f RetryFuncWithData[T], options ...Option) (T, error) {
 	valkyrietry := defaultValkyrietryWithContext(ctx, options...)
 
 	currentAttempt := 0

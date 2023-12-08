@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	options := []valkyrietry.Option{
 		valkyrietry.WithMaxRetryAttempts(1),
 		valkyrietry.WithRetryDelay(2 * time.Second),
@@ -34,7 +37,7 @@ func main() {
 	}
 
 	// Use Valkyrietry to handle the retry logic
-	if err := valkyrietry.Do(retryFunc, options...); err != nil {
+	if err := valkyrietry.Do(ctx, retryFunc, options...); err != nil {
 		fmt.Println("Operation failed after retries:", err)
 		return
 	}

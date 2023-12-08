@@ -22,20 +22,23 @@ To get started with Valkyrietry, simply install the library in your GoLang proje
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/confus1on/valkyrietry"
+	"github.com/ruang-guru/valkyrietry"
 )
 
 func main() {
+	ctx := context.Background()
+
 	options := []valkyrietry.Option{
-		valkyrietry.WithMaxRetryAttempts(5),
-		valkyrietry.WithRetryDelay(0.5 * time.Second) // Google use 0.5 as initial retry,
-		valkyrietry.WithRetryBackoffMultiplier(1.5) // Google also use 1.5 for default multiplier,
-		valkyrietry.WithJitter(0.5),
+		valkyrietry.WithMaxRetryAttempts(1),
+		valkyrietry.WithRetryDelay(2 * time.Second),
+		valkyrietry.WithRetryBackoffMultiplier(2),
+		valkyrietry.WithJitter(0.2),
 	}
 
 	retryFunc := func() error {
@@ -55,7 +58,7 @@ func main() {
 	}
 
 	// Use Valkyrietry to handle the retry logic
-	if err := valkyrietry.Do(retryFunc, options...); err != nil {
+	if err := valkyrietry.Do(ctx, retryFunc, options...); err != nil {
 		fmt.Println("Operation failed after retries:", err)
 		return
 	}
