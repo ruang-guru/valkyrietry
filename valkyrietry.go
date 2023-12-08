@@ -45,21 +45,8 @@ func defaultValkyrietry(options ...Option) *Valkyrietry {
 }
 
 func defaultValkyrietryWithContext(ctx context.Context, options ...Option) *Valkyrietry {
-	defaultConfiguration := &Configuration{
-		MaxRetryAttempts:       DefaultMaxRetryAttempt,
-		InitialRetryDelay:      DefaultRetryDelay,
-		RetryBackoffMultiplier: DefaultRetryBackoffMultiplier,
-		JitterPercentage:       DefaultJitter,
-	}
-
-	defaultValue := &Valkyrietry{
-		Configuration: defaultConfiguration,
-		ctx:           ctx,
-	}
-
-	for _, opt := range options {
-		opt(defaultConfiguration)
-	}
+	defaultValue := defaultValkyrietry(options...)
+	defaultValue.ctx = ctx
 
 	return defaultValue
 }
