@@ -2,6 +2,7 @@ package valkyrietry
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"time"
 )
@@ -70,12 +71,14 @@ func Do(ctx context.Context, f RetryFunc, options ...Option) error {
 		timer.Stop()
 	}()
 
+	var err error
+
 	for {
 		if currentAttempt > int(valkyrietry.Configuration.MaxRetryAttempts) {
-			return ErrMaxRetryAttemptsExceeded
+			return errors.Join(err, ErrMaxRetryAttemptsExceeded)
 		}
 
-		err := f()
+		err = f()
 
 		if err == nil {
 			return nil
@@ -118,13 +121,14 @@ func DoWithData[T any](ctx context.Context, f RetryFuncWithData[T], options ...O
 	}()
 
 	var response T
+	var err error
 
 	for {
 		if currentAttempt > int(valkyrietry.Configuration.MaxRetryAttempts) {
-			return response, ErrMaxRetryAttemptsExceeded
+			return response, errors.Join(err, ErrMaxRetryAttemptsExceeded)
 		}
 
-		response, err := f()
+		response, err = f()
 
 		if err == nil {
 			return response, nil

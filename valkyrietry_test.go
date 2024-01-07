@@ -41,7 +41,7 @@ func TestMaxRetryAttemptsExceeded(t *testing.T) {
 		WithMaxRetryAttempts(2),
 	)
 
-	if err == nil || err != ErrMaxRetryAttemptsExceeded {
+	if err == nil || !errors.Is(err, ErrMaxRetryAttemptsExceeded) {
 		t.Errorf("Expected ErrMaxRetryAttemptsExceeded, got %v", err)
 	}
 }
